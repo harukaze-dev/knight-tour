@@ -78,10 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function submitRanking() {
         const name = nicknameInput.value.trim();
         if (!name) { alert('닉네임을 입력해주세요.'); return; }
-        
         submitRankButton.disabled = true;
         submitRankButton.textContent = '등록 중...';
-
         try {
             const response = await fetch('/api/rankings', {
                 method: 'POST',
@@ -90,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (result.success) {
-                // [수정] 보드 사이즈를 포함한 동적 메시지로 변경
                 rankMessage.textContent = `${name}님, ${rows}x${cols} 사이즈에서 ${result.rank}위를 달성했습니다!`;
                 displayWinModalRankings(result.newRankings, name, clearTime);
                 nicknameEntryView.classList.add('hidden');
@@ -107,45 +104,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 사이즈 선택 및 게임 시작 로직 ---
-    function populateSizeOptions() {
-        sizeOptionsContainer.innerHTML = '';
-        const groupedSizes = boardSizes.reduce((acc, size) => { const prefix = size.split('x')[0]; if (!acc[prefix]) acc[prefix] = []; acc[prefix].push(size); return acc; }, {});
-        for (const prefix in groupedSizes) {
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'size-group';
-            const label = document.createElement('span');
-            label.className = 'size-group-label';
-            label.textContent = `${prefix}x`;
-            groupDiv.appendChild(label);
-            groupedSizes[prefix].forEach(size => {
-                const button = document.createElement('button');
-                button.className = 'size-option-button';
-                button.textContent = size;
-                button.addEventListener('click', () => handleSizeSelection(size, button));
-                groupDiv.appendChild(button);
-            });
-            sizeOptionsContainer.appendChild(groupDiv);
+    // --- 게임 플레이 로직 ---
+
+    // [추가] 오디오 컨텍스트 잠금 해제 함수
+    function unlockAudioContext() {
+        if (moveSound.paused) {
+            moveSound.play().catch(() => {}); // 첫 재생 시도 (오류는 무시)
+            moveSound.pause(); // 바로 멈춤
+            moveSound.currentTime = 0;
         }
     }
-    
-    function handleSizeSelection(size, button) {
-        document.querySelectorAll('.size-option-button.selected').forEach(b => b.classList.remove('selected'));
-        button.classList.add('selected');
-        selectedSize = size;
-        rankingBoardSizeSpan.textContent = size;
-        fetchAndDisplayRankings(size);
-        startSelectedGameButton.classList.remove('hidden');
-    }
 
-    // --- 게임 플레이 로직 ---
-    const playSound = () => { if (isSoundOn && moveSound) { moveSound.currentTime = 0; moveSound.play().catch(e => {}); } };
+    const playSound = () => {
+        if (isSoundOn && moveSound) {
+            moveSound.currentTime = 0;
+            // [수정] play()는 Promise를 반환하므로 잠재적인 오류를 처리합니다.
+            moveSound.play().catch(error => {
+                console.log("오디오 재생에 실패했습니다. 사용자의 상호작용이 필요할 수 있습니다.", error);
+            });
+        }
+    };
+
     const restartCurrentGame = () => initGame();
 
     function initGame() {
         if (!selectedSize && !rows) { alert("먼저 사이즈를 선택해주세요."); return; }
         if (selectedSize) { [rows, cols] = selectedSize.split('x').map(Number); }
-        
         totalSquares = rows * cols;
         moveCount = 0;
         knightPosition = null;
@@ -190,11 +174,48 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function resetToSetup() { gameSetup.classList.remove('hidden'); gameBoardContainer.classList.add('hidden'); resetTimer(); }
 
+    // --- 사이즈 선택 및 게임 시작 로직 ---
+    function populateSizeOptions() {
+        sizeOptionsContainer.innerHTML = '';
+        const groupedSizes = boardSizes.reduce((acc, size) => { const prefix = size.split('x')[0]; if (!acc[prefix]) acc[prefix] = []; acc[prefix].push(size); return acc; }, {});
+        for (const prefix in groupedSizes) {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'size-group';
+            const label = document.createElement('span');
+            label.className = 'size-group-label';
+            label.textContent = `${prefix}x`;
+            groupDiv.appendChild(label);
+            groupedSizes[prefix].forEach(size => {
+                const button = document.createElement('button');
+                button.className = 'size-option-button';
+                button.textContent = size;
+                button.addEventListener('click', () => handleSizeSelection(size, button));
+                groupDiv.appendChild(button);
+            });
+            sizeOptionsContainer.appendChild(groupDiv);
+        }
+    }
+    
+    function handleSizeSelection(size, button) {
+        document.querySelectorAll('.size-option-button.selected').forEach(b => b.classList.remove('selected'));
+        button.classList.add('selected');
+        selectedSize = size;
+        rankingBoardSizeSpan.textContent = size;
+        fetchAndDisplayRankings(size);
+        startSelectedGameButton.classList.remove('hidden');
+    }
+    
     // --- 초기화 및 이벤트 리스너 설정 ---
     function initialize() {
         themeToggle.addEventListener('change', () => applyTheme(themeToggle.checked ? 'dark' : 'light'));
         soundToggle.addEventListener('click', () => applySoundSetting(!isSoundOn));
-        showModalButton.addEventListener('click', openSizeModal);
+        
+        // [수정] '게임 시작하기' 버튼 클릭 시 모달 열기와 함께 오디오 컨텍스트 잠금 해제
+        showModalButton.addEventListener('click', () => {
+            unlockAudioContext();
+            openSizeModal();
+        });
+        
         modalCloseButton.addEventListener('click', closeSizeModal);
         modalOverlay.addEventListener('click', (e) => e.target === modalOverlay && closeSizeModal());
         winModalOverlay.addEventListener('click', (e) => e.target === winModalOverlay && closeWinModal());

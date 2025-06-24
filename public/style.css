@@ -12,7 +12,6 @@ body[data-theme='light'] {
     --text-secondary: #6c757d;
     --accent-color: #007bff;
     --accent-hover-color: #0056b3;
-    /* [수정] 라이트 모드 하이라이트 색상을 노란색 계열로 변경 */
     --highlight-color: #FFD700;
     --board-light-sq: #e8e8e8;
     --board-dark-sq: #b0b0b0;
@@ -20,7 +19,6 @@ body[data-theme='light'] {
     --shadow-opacity: 0.1;
     --restart-secondary-color: #dc3545;
     --restart-secondary-hover-color: #c82333;
-    /* [추가] 나이트 외곽선 색상 (라이트 모드) */
     --knight-stroke-color: #000000;
 }
 body[data-theme='dark'] {
@@ -37,7 +35,6 @@ body[data-theme='dark'] {
     --shadow-opacity: 0.4;
     --restart-secondary-color: #cf6679;
     --restart-secondary-hover-color: #b35262;
-    /* [추가] 나이트 외곽선 색상 (다크 모드) */
     --knight-stroke-color: #ffffff;
 }
 
@@ -117,9 +114,12 @@ h1 { font-size: 2.8rem; font-weight: 700; margin: 0; }
 .knight {
     font-size: 3.8rem;
     color: var(--knight-color);
-    /* [수정] 네온 효과(text-shadow) 제거, 외곽선 추가 */
-    -webkit-text-stroke: 1px var(--knight-stroke-color);
-    text-stroke: 1px var(--knight-stroke-color);
+    /* [수정] text-stroke를 모든 브라우저에서 호환되는 text-shadow로 변경하여 외곽선 효과를 구현 */
+    text-shadow:
+        -1px -1px 0 var(--knight-stroke-color),
+         1px -1px 0 var(--knight-stroke-color),
+        -1px  1px 0 var(--knight-stroke-color),
+         1px  1px 0 var(--knight-stroke-color);
 }
 .visited { opacity: 0.8; }
 .highlight { position: relative; cursor: pointer; }
