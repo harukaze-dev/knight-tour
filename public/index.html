@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나이트의 여정 (Knight's Tour)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="top-left-controls">
+        <label class="theme-switcher">
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </label>
+        <button id="sound-toggle">🔊</button>
+        <div id="timer">00:00:00</div>
+    </div>
+
+    <div id="modal-overlay" class="hidden">
+        <div id="modal-content" class="size-modal-content">
+            <button id="modal-close-button">×</button>
+            <div class="modal-left">
+                <h2>보드 크기 선택</h2>
+                <div id="size-options-container"></div>
+            </div>
+            <div class="modal-right">
+                <h3>랭킹 보드: <span id="ranking-board-size"></span></h3>
+                <ol id="ranking-board"></ol>
+                <button id="start-selected-game-button" class="hidden">게임 시작</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="win-modal-overlay" class="hidden">
+        <div id="modal-content" class="win-modal-content">
+            <div id="nickname-entry-view">
+                <h2>🎉 축하합니다! 🎉</h2>
+                <p>기록을 남기려면 닉네임을 입력하세요.</p>
+                <div class="win-modal-stats">
+                    <p>보드 크기: <span id="win-modal-size"></span></p>
+                    <p>클리어 타임: <span id="win-modal-time"></span></p>
+                </div>
+                <input type="text" id="nickname-input" placeholder="닉네임 (최대 10자)" maxlength="10">
+                <button id="submit-rank-button">랭킹 등록</button>
+            </div>
+            <div id="rank-result-view" class="hidden">
+                <h2>랭킹 등록 완료!</h2>
+                <p id="rank-message"></p>
+                <!-- [추가] 승리 모달 내부에 랭킹 보드를 표시할 리스트 -->
+                <ol id="win-modal-ranking-board"></ol>
+                <div class="win-modal-controls">
+                    <button id="win-modal-restart-same">이 사이즈로 다시하기</button>
+                    <button id="win-modal-choose-new">사이즈 다시 고르기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main id="game-container">
+        <header class="game-header">
+            <h1>나이트의 여정</h1>
+            <p class="subtitle">Knight's Tour Challenge</p>
+        </header>
+
+        <section id="game-setup" class="card">
+            <p>모든 칸을 방문하는 여정을 시작해보세요!</p>
+            <button id="show-modal-button">게임 시작하기</button>
+        </section>
+
+        <section id="game-board-container" class="hidden">
+            <p id="message"></p>
+            <div id="game-board"></div>
+            <div id="game-controls">
+                <button id="restart-same-size-button">이 사이즈로 다시하기</button>
+                <button id="choose-new-size-button">사이즈 다시 고르기</button>
+            </div>
+        </section>
+    </main>
+    
+    <audio id="move-sound" src="sounds/move-sound.mp3" preload="auto"></audio>
+
+    <script src="client.js"></script>
+</body>
+</html>
