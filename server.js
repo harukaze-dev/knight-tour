@@ -58,6 +58,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/health', (req, res) => {
+  // 서버가 살아있다는 의미로 상태 코드 200과 함께 'OK' 텍스트를 응답합니다.
+  res.status(200).send('OK');
+});
+
 // 서버 시작
 app.listen(PORT, () => {
   console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
